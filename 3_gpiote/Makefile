@@ -1,5 +1,5 @@
 FAMILY := nrf52
-SOURCES := main.c # Fill in missing sources
+SOURCES := main.c gpio.c gpiote.c ppi.c # Fill in missing sources
 
 BUILD_DIR := build
 BUILD_SYS := .build_system
