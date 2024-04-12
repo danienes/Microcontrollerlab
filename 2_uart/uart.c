@@ -1,13 +1,14 @@
 #include "uart.h"
 #include "gpio.h"
 
-#define UART ((NRF_UART_REG*)0x40002000)
+#define UART ((NRF_UART_REG *)0x40002000)
 
-typedef struct {
-    volatile uint32_t TASKS_STARTRX; 
+typedef struct
+{
+    volatile uint32_t TASKS_STARTRX;
     volatile uint32_t TASKS_STOPRX;
     volatile uint32_t TASKS_STARTTX;
-    volatile uint32_t TASKS_STOPTX; 
+    volatile uint32_t TASKS_STOPTX;
     volatile uint32_t RESERVED0[3];
     volatile uint32_t TASKS_SUSPEND;
     volatile uint32_t RESERVED1[56];
@@ -28,9 +29,9 @@ typedef struct {
     volatile uint32_t RESERVED7[93];
     volatile uint32_t ERRORSRC;
     volatile uint32_t RESERVED8[31];
-    volatile uint32_t ENABLE; 
+    volatile uint32_t ENABLE;
     volatile uint32_t RESERVED9;
-    volatile uint32_t PSELRTS; 
+    volatile uint32_t PSELRTS;
     volatile uint32_t PSELTXD;
     volatile uint32_t PSELCTS;
     volatile uint32_t PSELRXD;
@@ -42,38 +43,44 @@ typedef struct {
     volatile uint32_t CONFIG;
 } NRF_UART_REG;
 
-
-void uart_init(){
-    GPIO->PIN_CNF[6] = (0<<0);
-    GPIO->PIN_CNF[8] = (1<<0);
+void uart_init()
+{
+    GPIO->PIN_CNF[6] = (0 << 0);
+    GPIO->PIN_CNF[8] = (1 << 0);
     UART->PSELTXD = 6;
     UART->PSELRXD = 8;
-    UART->BAUDRATE = 0x00275000; //Setter baudraten til 9600
-    UART->PSELRTS = 0xFFFFFFFF;
-    UART->PSELCTS = 0xFFFFFFFF;
+
+    UART->PSELRTS = ~0;
+    UART->PSELCTS = ~0;
+
+    UART->BAUDRATE = 0x00275000; // Setter baudraten til 9600
     UART->ENABLE = 4;
     UART->TASKS_STARTRX = 1;
 }
 
-
-void uart_send(char letter){
+void uart_send(char letter)
+{
     UART->TASKS_STARTTX = 1;
     UART->TXD = letter;
-    while (!(UART->EVENTS_TXDRDY));
+    while (!(UART->EVENTS_TXDRDY))
+        ;
     UART->EVENTS_TXDRDY = 0;
     UART->TASKS_STOPTX = 1;
 }
 
-
-char uart_read(){
+char uart_read()
+{
     char letter;
     UART->EVENTS_RXDRDY = 0;
     UART->TASKS_STARTRX = 1;
     if (UART->EVENTS_RXDRDY)
     {
         letter = UART->RXD;
-    }else{
+    }
+    else
+    {
         letter = '\0';
     }
     return letter;
 }
+
